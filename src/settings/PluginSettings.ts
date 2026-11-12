@@ -1,7 +1,8 @@
-import { DEFAULT_EMOTIONS } from "../emotions/index";
-import { EmotionSection } from "../emotions/EmotionSection";
+import { EmotionSection } from "./legacy/EmotionSection";
+import { EmotionNode } from "../emotions/EmotionNode";
 
 export type EmotionPickerLocaleOverride = "en" | string;
+export type ViewMode = "wheel" | "list";
 
 export interface EmotionPickerSettings {
 	modalHeaderText: string;
@@ -9,7 +10,10 @@ export interface EmotionPickerSettings {
 	addAsLink: boolean;
 	addAsTag: boolean;
 	capitalize: boolean;
-	emotions: EmotionSection[];
+	/** Legacy flat list from old versions. Read only for migration. Never written. */
+	emotions?: EmotionSection[];
+	emotionTree: EmotionNode[];
+	viewMode: ViewMode;
 	locale: EmotionPickerLocaleOverride;
 }
 
@@ -19,6 +23,7 @@ export class DefaultSettings implements EmotionPickerSettings {
 	addAsLink = false;
 	addAsTag = false;
 	capitalize = false;
-	emotions = DEFAULT_EMOTIONS;
-	locale: "en";
+	emotionTree: EmotionNode[] = [];
+	viewMode: ViewMode = "wheel";
+	locale: EmotionPickerLocaleOverride = "en";
 }

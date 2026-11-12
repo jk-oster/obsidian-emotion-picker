@@ -1,26 +1,9 @@
 
 /* settings */
-.emotion-section-setting {
-	display: block;
-}
-
-.emotion-section-setting > .setting-item-control {
-	display: flex;
-	flex-direction: row;
-	align-items: flex-start;
-	justify-content: flex-start;
-}
-
-.emotion-section-setting > .setting-item-control > span {
-	margin-right: 5px;
-}
-
-.emotion-section-setting > .setting-item-control > input, .emotion-section-setting > .setting-item-control > textarea {
-	margin-right: 30px;
-}
-
-.emotion-section-setting textarea {
-	max-height: 200px;
+.emotion-import-textarea {
+	width: 100%;
+	min-width: 280px;
+	font-family: var(--font-monospace);
 }
 
 /* modal */
@@ -51,10 +34,129 @@
 	width: 130px;
 }
 
+/* larger window so that the wheel fits; the content scrolls when the screen is small */
+/* Obsidian sizes its modal with these variables (default 540px wide, 80vw, 85vh).
+   Set them and also the properties with !important, so that no theme rule wins. */
+.modal.emotion-picker-modal {
+	--modal-width: min(900px, 96vw);
+	--modal-max-width: 96vw;
+	--modal-max-height: 96vh;
+	width: min(900px, 96vw) !important;
+	max-width: 96vw !important;
+	max-height: 96vh !important;
+}
+
+.emotion-picker-modal .modal-content {
+	max-height: calc(96vh - 60px);
+	overflow-y: auto;
+}
+
+/* less space above the wheel, so that more height is left for it */
+.emotion-picker-modal h3 {
+	margin: 0 0 0.4rem;
+}
+
+/* one row for all controls: toggles on the left, view switch and language on the right */
+.emotion-picker-modal .toggles-section {
+	align-items: center;
+	row-gap: 0.4rem;
+	margin-bottom: 0.5rem;
+}
+
+.emotion-view-switch {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-left: auto;
+}
+
+.emotion-view-switch button[aria-pressed="true"] {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+/* wheel: wins over ".modal-body > div" (flex row) because of the higher specificity */
+.modal-body > .emotion-wheel-container {
+	display: block;
+}
+
+.emotion-wheel {
+	position: relative;
+	width: 100%;
+	/* The wheel is square. Its width is limited by the window height minus about 200px
+	   for the heading, the toggles, the switch row, and the modal padding. */
+	max-width: min(780px, max(280px, calc(96vh - 200px)));
+	margin: 0 auto;
+}
+
+.emotion-wheel-svg {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.emotion-wheel-back {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1;
+}
+
+.emotion-wheel-segment {
+	cursor: pointer;
+	outline: none;
+}
+
+.emotion-wheel-segment path {
+	stroke: var(--background-primary);
+	stroke-width: 1.5;
+	transition: filter 0.1s linear;
+}
+
+.emotion-wheel-segment:hover path {
+	filter: brightness(1.1);
+}
+
+.emotion-wheel-segment:focus-visible path,
+.emotion-wheel-center:focus-visible circle {
+	stroke: var(--interactive-accent);
+	stroke-width: 4;
+}
+
+.emotion-wheel-label {
+	pointer-events: none;
+	font-family: var(--font-interface);
+}
+
+.emotion-wheel-center {
+	outline: none;
+}
+
+.emotion-wheel-center circle {
+	fill: var(--background-primary);
+	stroke: var(--background-modifier-border);
+}
+
+.emotion-wheel-center[role="button"] {
+	cursor: pointer;
+}
+
+.emotion-wheel-center text {
+	fill: var(--text-normal);
+}
+
 .emotion-element {
 	text-decoration: underline solid 1px;
 	cursor: pointer;
 	transition: linear 0.1s;
+}
+
+.emotion-element-group {
+	font-weight: 600;
+	margin-top: 0.3rem;
 }
 
 .emotion-element:hover {

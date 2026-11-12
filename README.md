@@ -13,4 +13,36 @@ Available options (default values can be set in Settings tab):
 
 ![Plugin overview](./emotion-picker.png "Plugin overview")
 
+### Emotion wheel
+
+The picker shows an emotion wheel with three rings: core emotion, secondary emotion, and outer word. Click any segment to insert its name. Hover a segment to see its full path.
+
+-   Use the **Wheel / List** switch in the picker to change the view. The choice is saved. You can also set the default view in the settings.
+-   Keyboard: Tab moves into the wheel. Arrow left and right move between neighbours. Arrow down goes to the first child. Arrow up goes to the parent. Enter or Space inserts the word.
+-   On mobile, a tap on a segment with children zooms into that branch. Tap the center to insert the zoomed emotion. Tap **Back** to zoom out.
+-   Default wheels exist for English, Spanish, Swedish, and German. Change the language with **Override locale** in the settings. This replaces your current tree.
+
+### Custom emotion tree (JSON)
+
+Open the settings, paste a JSON array into **Custom tree (JSON)**, and press **Import tree**. Use **Copy current tree as JSON** to get a template.
+
+```json
+[
+	{
+		"id": "joy",
+		"name": "Joy",
+		"color": "#c1e08d",
+		"children": [
+			{
+				"id": "joy/proud",
+				"name": "Proud",
+				"children": [{ "id": "joy/proud/confident", "name": "confident" }]
+			}
+		]
+	}
+]
+```
+
+Rules: every node needs a unique `id` and a `name` (up to 40 characters). Only top-level nodes need a `color` (`#rrggbb`). Use `children` for up to 3 levels and 500 nodes in total. An invalid import changes nothing. Lists from older plugin versions convert to a two-level tree automatically. The plugin keeps the old list in `data.json`.
+
 The primary purpose is to provide an easier way to add entries to daily journal, emotions / mood tracker, etc.

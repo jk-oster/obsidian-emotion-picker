@@ -3,7 +3,8 @@ import { DefaultSettings, EmotionPickerSettings } from "src/settings/PluginSetti
 import { addSmileIcon } from "src/SmileIcon";
 import { EmotionPickerModal } from "./src/Modal";
 import { EmotionPickerSettingsTab } from "src/settings/SettingsTab";
-import { EmotionSection, getDefaultEmotions } from "src/emotions";
+import { EmotionNode } from "src/emotions/EmotionNode";
+import { resolveEmotionTree } from "src/settings/migrate";
 
 export default class EmotionPickerPlugin extends Plugin {
 	settings: EmotionPickerSettings;
@@ -33,20 +34,23 @@ export default class EmotionPickerPlugin extends Plugin {
 
 	async loadSettings() {
 		const loadedSettings = await this.loadData();
-		this.settings = Object.assign(
+		const settings: EmotionPickerSettings = Object.assign(
 			{},
 			new DefaultSettings(),
 			loadedSettings
 		);
+		settings.emotionTree = resolveEmotionTree(
+			loadedSettings,
+			settings.locale
+		);
+		this.settings = settings;
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
 
-	getEmotionsOrDefault(): EmotionSection[] {
-		if (this.settings.emotions && this.settings.emotions.length > 0)
-			return this.settings.emotions;
-		return getDefaultEmotions(this.settings.locale);
+	getEmotionTree(): EmotionNode[] {
+		return this.settings.emotionTree;
 	}
 }

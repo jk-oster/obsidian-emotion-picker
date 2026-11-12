@@ -1,15 +1,18 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
-import { locales } from "../emotions/locale/Locales";
+import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { localeNames, locales } from "../emotions/locale/Locales";
 import EmotionPickerPlugin from "../../main";
-import { EmotionPickerLocaleOverride } from "./PluginSettings";
-import { getDefaultEmotions } from "src/emotions";
+import { EmotionPickerLocaleOverride, ViewMode } from "./PluginSettings";
+import { getDefaultEmotionTree } from "src/emotions";
+import { countLeaves } from "../emotions/tree";
+import { importTree } from "./importTree";
+
 export class EmotionPickerSettingsTab extends PluginSettingTab {
 	plugin: EmotionPickerPlugin;
+	importText = "";
 
 	constructor(app: App, plugin: EmotionPickerPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
-		this.plugin.settings.emotions = plugin.getEmotionsOrDefault();
 	}
 
 	refresh(): void {
@@ -22,8 +25,6 @@ export class EmotionPickerSettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		containerEl.createEl("h2", { text: "Emotion Picker Settings" });
-
-		// TODO: customize modal header
 
 		new Setting(containerEl)
 			.setName("Modal header text")
@@ -84,6 +85,19 @@ export class EmotionPickerSettingsTab extends PluginSettingTab {
 					})
 			);
 
+		new Setting(containerEl)
+			.setName("Default view")
+			.setDesc("Show the emotion wheel or the plain list when the picker opens")
+			.addDropdown((dropdown) => {
+				dropdown.addOption("wheel", "Wheel");
+				dropdown.addOption("list", "List");
+				dropdown.setValue(this.plugin.settings.viewMode);
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.viewMode = value as ViewMode;
+					await this.plugin.saveSettings();
+				});
+			});
+
 		new Setting(this.containerEl)
 			.setName("Override locale:")
 			.setDesc(
@@ -91,121 +105,92 @@ export class EmotionPickerSettingsTab extends PluginSettingTab {
 			)
 			.addDropdown((dropdown) => {
 				locales.forEach((locale) => {
-					dropdown.addOption(locale, locale);
+					dropdown.addOption(locale, localeNames[locale] ?? locale);
 				});
 				dropdown.setValue(this.plugin.settings.locale);
 				dropdown.onChange(async (value) => {
 					const isLocaleChanged = value !== this.plugin.settings.locale;
 					if (isLocaleChanged) {
 						this.plugin.settings.locale = value as EmotionPickerLocaleOverride;
-						this.plugin.settings.emotions =	getDefaultEmotions(value);
+						this.plugin.settings.emotionTree = getDefaultEmotionTree(value);
 						await this.plugin.saveSettings();
 						this.refresh();
 					}
 				});
 			});
 
-		containerEl.createEl("h3", { text: "Emotion groups" });
+		this.displayTreeSettings(containerEl);
+	}
 
-		// TODO: refresh settings page after saving
+	private displayTreeSettings(containerEl: HTMLElement): void {
+		containerEl.createEl("h3", { text: "Emotion tree" });
 
-		this.plugin.settings.emotions.forEach((es) => {
-			const setting = new Setting(containerEl);
-			setting.setClass("emotion-section-setting");
+		const leafCount = this.plugin.settings.emotionTree.reduce(
+			(sum, node) => sum + countLeaves(node),
+			0
+		);
+		containerEl.createEl("p", {
+			text: `Current tree: ${this.plugin.settings.emotionTree.length} core emotions, ${leafCount} outer words.`,
+		});
 
-			const groupNameLabel = createEl("span", { text: "Name: " });
-			setting.controlEl.appendChild(groupNameLabel);
-
-			setting.addText((textField) => {
-				textField
-					.setValue(es.name)
-					.setPlaceholder("group name")
-					.onChange((value) => {
-						es.name = value;
-						this.plugin.saveSettings();
-					});
-			});
-
-			const colorPickerLabel = createEl("span", { text: "Color: " });
-			setting.controlEl.appendChild(colorPickerLabel);
-
-			const colorPicker = createEl(
-				"input",
-				{
-					type: "color",
-					cls: "settings-color-picker",
-				},
-				(el) => {
-					el.value = es.color;
-					el.onchange = () => {
-						es.color = el.value;
-						this.plugin.saveSettings();
-					};
-				}
-			);
-
-			setting.controlEl.appendChild(colorPicker);
-
-			const emotionsListLabel = createEl("span", {
-				text: "Emotions:",
-			});
-			setting.controlEl.appendChild(emotionsListLabel);
-
-			setting.addTextArea((textArea) => {
-				textArea.inputEl.setAttribute(
-					"rows",
-					es.emotions.length.toString()
-				);
-
+		new Setting(containerEl)
+			.setName("Custom tree (JSON)")
+			.setDesc(
+				'Paste a JSON array. Each node needs "id" and "name". Level-1 nodes also need a "color" like #c1e08d. Use "children" for up to 3 levels. Tip: export the current tree first and edit it.'
+			)
+			.addTextArea((textArea) => {
+				textArea.inputEl.rows = 10;
+				textArea.inputEl.addClass("emotion-import-textarea");
 				textArea
-					.setPlaceholder("emotions, separated by newline or comma.")
-					.setValue(es.emotions.join("\n"))
-					.onChange(async (value) => {
-						es.emotions = splitByCommaAndNewline(value);
-						this.plugin.saveSettings();
+					.setPlaceholder(
+						'[{"id":"joy","name":"Joy","color":"#c1e08d","children":[{"id":"joy/proud","name":"Proud"}]}]'
+					)
+					.setValue(this.importText)
+					.onChange((value) => {
+						this.importText = value;
 					});
 			});
 
-			setting.addButton((btn) => {
-				btn.setButtonText("delete group");
-				btn.setClass("settings-delete-btn");
-				btn.onClick(() => {
-					this.plugin.settings.emotions =
-						this.plugin.settings.emotions.filter(
-							(e) => e.id !== es.id
+		new Setting(containerEl)
+			.addButton((button) => {
+				button.setButtonText("Import tree");
+				button.setCta();
+				button.onClick(async () => {
+					const { tree, errors } = importTree(this.importText);
+					if (!tree) {
+						new Notice(
+							`Import failed. Nothing was changed.\n${errors.join("\n")}`,
+							10000
 						);
-					this.plugin.saveSettings();
+						return;
+					}
+					this.plugin.settings.emotionTree = tree;
+					await this.plugin.saveSettings();
+					this.importText = "";
+					new Notice("Emotion tree imported.");
+					this.refresh();
+				});
+			})
+			.addButton((button) => {
+				button.setButtonText("Copy current tree as JSON");
+				button.onClick(async () => {
+					await navigator.clipboard.writeText(
+						JSON.stringify(this.plugin.settings.emotionTree, null, 2)
+					);
+					new Notice("Emotion tree copied to the clipboard.");
+				});
+			})
+			.addButton((button) => {
+				button.setButtonText("Reset to locale default");
+				button.setWarning();
+				button.onClick(async () => {
+					this.plugin.settings.emotionTree = getDefaultEmotionTree(
+						this.plugin.settings.locale
+					);
+					await this.plugin.saveSettings();
+					new Notice("Emotion tree reset to the default.");
 					this.refresh();
 				});
 			});
-		});
-
-		new Setting(containerEl).addButton((btn) => {
-			btn.setButtonText("Add group");
-			btn.onClick(() => {
-				this.plugin.settings.emotions.push({
-					id:
-						Math.max(
-							...this.plugin.settings.emotions.map((e) => e.id)
-						) + 1, // id "generation"
-					name: "New section",
-					emotions: [],
-					color: "#000000",
-				});
-				this.plugin.saveSettings();
-				this.refresh();
-			});
-		});
 	}
 }
-
-function splitByCommaAndNewline(rawEmotions: string): string[] {
-	const splitted: string[] = [];
-
-	rawEmotions
-		.split("\n")
-		.forEach((s) => s.split(",").forEach((sp) => splitted.push(sp.trim())));
-
-	return splitted;
-}
-

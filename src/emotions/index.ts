@@ -1,25 +1,25 @@
-import { EmotionSection } from "./EmotionSection";
-import { DEFAULT_EMOTIONS } from "./DefaultEmotions";
-import { DEFAULT_SWEDISH_EMOTIONS } from "./locale/sv/DefaultEmotions";
-import { DEFAULT_SPANISH_EMOTIONS } from "./locale/es/DefaultEmotions";
+import { EmotionNode } from "./EmotionNode";
+import { deepCopy } from "./tree";
+import { GERMAN_EMOTION_TREE } from "./trees/de";
+import { DEFAULT_EMOTION_TREE } from "./trees/en";
+import { SPANISH_EMOTION_TREE } from "./trees/es";
+import { SWEDISH_EMOTION_TREE } from "./trees/sv";
 
-
-
-const getDefaultEmotions = (locale: string): EmotionSection[] => {
+const pickDefaultTree = (locale: string): EmotionNode[] => {
 	switch (locale) {
 		case "sv":
-			return DEFAULT_SWEDISH_EMOTIONS;
+			return SWEDISH_EMOTION_TREE;
 		case "es":
-			return DEFAULT_SPANISH_EMOTIONS;
+			return SPANISH_EMOTION_TREE;
+		case "de":
+			return GERMAN_EMOTION_TREE;
 		default:
-			return DEFAULT_EMOTIONS;
+			return DEFAULT_EMOTION_TREE;
 	}
 };
 
-export {
-	DEFAULT_EMOTIONS,
-	DEFAULT_SWEDISH_EMOTIONS,
-	DEFAULT_SPANISH_EMOTIONS,
-	EmotionSection,
-	getDefaultEmotions,
-};
+/** Returns a copy. Edits never change the shared default trees. Unknown locales get English. */
+const getDefaultEmotionTree = (locale: string): EmotionNode[] =>
+	deepCopy(pickDefaultTree(locale));
+
+export { getDefaultEmotionTree };
