@@ -20,7 +20,7 @@ The picker shows an emotion wheel with three rings: core emotion, secondary emot
 -   Use the **Wheel / List** switch in the picker to change the view. The choice is saved. You can also set the default view in the settings.
 -   Keyboard: Tab moves into the wheel. Arrow left and right move between neighbours. Arrow down goes to the first child. Arrow up goes to the parent. Enter or Space inserts the word.
 -   On mobile, a tap on a segment with children zooms into that branch. Tap the center to insert the zoomed emotion. Tap **Back** to zoom out.
--   Default wheels exist for English, Spanish, Swedish, and German. Change the language with **Override locale** in the settings. This replaces your current tree.
+-   Default wheels exist for English, Spanish, Swedish, and German. Change the language with **Override locale** in the settings. The plugin saves your edits for each language. When you switch back, the plugin restores them. **Reset to locale default** resets the current language only.
 
 ### Edit the emotion tree
 
