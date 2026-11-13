@@ -5,6 +5,7 @@ import { EmotionPickerLocaleOverride, ViewMode } from "./PluginSettings";
 import { getDefaultEmotionTree } from "src/emotions";
 import { countLeaves } from "../emotions/tree";
 import { importTree } from "./importTree";
+import { TreeEditor } from "./TreeEditor";
 
 export class EmotionPickerSettingsTab extends PluginSettingTab {
 	plugin: EmotionPickerPlugin;
@@ -125,14 +126,33 @@ export class EmotionPickerSettingsTab extends PluginSettingTab {
 	private displayTreeSettings(containerEl: HTMLElement): void {
 		containerEl.createEl("h3", { text: "Emotion tree" });
 
-		const leafCount = this.plugin.settings.emotionTree.reduce(
-			(sum, node) => sum + countLeaves(node),
-			0
-		);
-		containerEl.createEl("p", {
-			text: `Current tree: ${this.plugin.settings.emotionTree.length} core emotions, ${leafCount} outer words.`,
-		});
+		const summaryEl = containerEl.createEl("p");
+		const updateSummary = () => {
+			const tree = this.plugin.settings.emotionTree;
+			const leafCount = tree.reduce((sum, node) => sum + countLeaves(node), 0);
+			summaryEl.setText(
+				`Current tree: ${tree.length} core emotions, ${leafCount} outer words. Edits save at once.`
+			);
+		};
+		updateSummary();
 
+		const editorEl = containerEl.createDiv();
+		new TreeEditor(
+			editorEl,
+			() => this.plugin.settings.emotionTree,
+			async (tree) => {
+				this.plugin.settings.emotionTree = tree;
+				await this.plugin.saveSettings();
+			},
+			updateSummary
+		).render();
+
+		const advanced = containerEl.createEl("details", { cls: "emotion-tree-advanced" });
+		advanced.createEl("summary", { text: "Advanced: import, export, and reset" });
+		this.displayJsonSettings(advanced);
+	}
+
+	private displayJsonSettings(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setName("Custom tree (JSON)")
 			.setDesc(

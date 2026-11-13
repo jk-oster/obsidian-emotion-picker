@@ -26,6 +26,14 @@ export function countLeaves(node: EmotionNode): number {
 	return node.children.reduce((sum, child) => sum + countLeaves(child), 0);
 }
 
+/** Count all nodes of all levels. */
+export function countNodes(roots: EmotionNode[]): number {
+	return roots.reduce(
+		(sum, node) => sum + 1 + countNodes(node.children ?? []),
+		0
+	);
+}
+
 export function depthOf(node: EmotionNode): number {
 	if (!node.children || node.children.length === 0) return 1;
 	return 1 + Math.max(...node.children.map(depthOf));

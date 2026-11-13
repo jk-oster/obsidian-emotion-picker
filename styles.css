@@ -164,3 +164,68 @@
 	font-size: 103%;
 	text-decoration: underline solid 2px;
 }
+
+/* settings: tree editor */
+.emotion-tree-editor {
+	margin-bottom: 0.5rem;
+}
+
+.emotion-tree-row {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding-block: 2px;
+}
+
+.emotion-tree-toggle.is-placeholder {
+	visibility: hidden;
+}
+
+.emotion-tree-color {
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	flex: none;
+}
+
+.emotion-tree-swatch {
+	width: 16px;
+	height: 16px;
+	margin-inline: 6px;
+	border-radius: 50%;
+	flex: none;
+}
+
+.emotion-tree-name {
+	flex: 1 1 auto;
+	min-width: 80px;
+}
+
+.emotion-tree-count {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	min-width: 1.5em;
+	text-align: right;
+}
+
+.emotion-tree-actions {
+	display: flex;
+	flex: none;
+}
+
+.emotion-tree-actions .mod-warning {
+	color: var(--text-error);
+}
+
+.emotion-tree-footer {
+	margin-top: 0.5rem;
+}
+
+.emotion-tree-advanced {
+	margin-top: 1rem;
+}
+
+.emotion-tree-advanced > summary {
+	cursor: pointer;
+	margin-bottom: 0.5rem;
+}

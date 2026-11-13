@@ -22,9 +22,13 @@ The picker shows an emotion wheel with three rings: core emotion, secondary emot
 -   On mobile, a tap on a segment with children zooms into that branch. Tap the center to insert the zoomed emotion. Tap **Back** to zoom out.
 -   Default wheels exist for English, Spanish, Swedish, and German. Change the language with **Override locale** in the settings. This replaces your current tree.
 
+### Edit the emotion tree
+
+Open the settings and find **Emotion tree**. Each row is one emotion. Edit the name, change the color of a core emotion, move a row up or down, add a word under a row, or delete a row. Changes save at once. Click a row arrow to show or hide its words. To delete a row that has words, click the delete button twice.
+
 ### Custom emotion tree (JSON)
 
-Open the settings, paste a JSON array into **Custom tree (JSON)**, and press **Import tree**. Use **Copy current tree as JSON** to get a template.
+Open **Advanced** in the settings, paste a JSON array into **Custom tree (JSON)**, and press **Import tree**. Use **Copy current tree as JSON** to get a template.
 
 ```json
 [
