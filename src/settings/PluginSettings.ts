@@ -13,6 +13,8 @@ export interface EmotionPickerSettings {
 	/** Legacy flat list from old versions. Read only for migration. Never written. */
 	emotions?: EmotionSection[];
 	emotionTree: EmotionNode[];
+	/** Saved trees of the other locales. Restored when the user switches back. */
+	localeTrees: Record<string, EmotionNode[]>;
 	viewMode: ViewMode;
 	locale: EmotionPickerLocaleOverride;
 }
@@ -24,6 +26,7 @@ export class DefaultSettings implements EmotionPickerSettings {
 	addAsTag = false;
 	capitalize = false;
 	emotionTree: EmotionNode[] = [];
+	localeTrees: Record<string, EmotionNode[]> = {};
 	viewMode: ViewMode = "wheel";
 	locale: EmotionPickerLocaleOverride = "en";
 }

@@ -6,6 +6,7 @@ import { getDefaultEmotionTree } from "src/emotions";
 import { countLeaves } from "../emotions/tree";
 import { importTree } from "./importTree";
 import { TreeEditor } from "./TreeEditor";
+import { switchLocale } from "./localeTrees";
 
 export class EmotionPickerSettingsTab extends PluginSettingTab {
 	plugin: EmotionPickerPlugin;
@@ -102,7 +103,7 @@ export class EmotionPickerSettingsTab extends PluginSettingTab {
 		new Setting(this.containerEl)
 			.setName("Override locale:")
 			.setDesc(
-				"Set this if you want to use a locale different from the default. \nWARNING: changing locale will erase your custom emotions for current locale!"
+				"Set this if you want to use a locale different from the default. The plugin saves your edits for each language. Switch back to restore them."
 			)
 			.addDropdown((dropdown) => {
 				locales.forEach((locale) => {
@@ -112,8 +113,10 @@ export class EmotionPickerSettingsTab extends PluginSettingTab {
 				dropdown.onChange(async (value) => {
 					const isLocaleChanged = value !== this.plugin.settings.locale;
 					if (isLocaleChanged) {
-						this.plugin.settings.locale = value as EmotionPickerLocaleOverride;
-						this.plugin.settings.emotionTree = getDefaultEmotionTree(value);
+						const next = switchLocale(this.plugin.settings, value);
+						this.plugin.settings.locale = next.locale as EmotionPickerLocaleOverride;
+						this.plugin.settings.emotionTree = next.emotionTree;
+						this.plugin.settings.localeTrees = next.localeTrees;
 						await this.plugin.saveSettings();
 						this.refresh();
 					}

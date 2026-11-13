@@ -5,6 +5,7 @@ import { EmotionPickerModal } from "./src/Modal";
 import { EmotionPickerSettingsTab } from "src/settings/SettingsTab";
 import { EmotionNode } from "src/emotions/EmotionNode";
 import { resolveEmotionTree } from "src/settings/migrate";
+import { sanitizeLocaleTrees } from "src/settings/localeTrees";
 
 export default class EmotionPickerPlugin extends Plugin {
 	settings: EmotionPickerSettings;
@@ -41,6 +42,10 @@ export default class EmotionPickerPlugin extends Plugin {
 		);
 		settings.emotionTree = resolveEmotionTree(
 			loadedSettings,
+			settings.locale
+		);
+		settings.localeTrees = sanitizeLocaleTrees(
+			loadedSettings?.localeTrees,
 			settings.locale
 		);
 		this.settings = settings;
